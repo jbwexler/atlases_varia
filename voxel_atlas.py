@@ -11,8 +11,8 @@ from __builtin__ import True
 
 
 
-def getAtlasVoxels(region, xmlFile):
-	tree = ET.parse(os.path.join('/Applications/fmri_progs/fsl/data/atlases/', xmlFile))
+def getAtlasVoxels(region, xmlFile, def_dir = '/Applications/fmri_progs/fsl/data/atlases/'):
+	tree = ET.parse(os.path.join(def_dir, xmlFile))
 	root = tree.getroot()
 	summaryimagelist = []
 	summaryimagefile = ''
@@ -24,7 +24,7 @@ def getAtlasVoxels(region, xmlFile):
 			
 	atlas_name = summaryimagefile + '.nii.gz'
 	#print atlas_name
-	atlas=nibabel.load(os.path.join('/Applications/fmri_progs/fsl/data/atlases', atlas_name[1:]))
+	atlas=nibabel.load(os.path.join(def_dir, atlas_name[1:]))
 	atlas_data=atlas.get_data()
 	name_value = 0
 	#print "Region: %s"%region
@@ -40,8 +40,8 @@ def getAtlasVoxels(region, xmlFile):
 			
 	return 'not in atlas'
         
-#voxels = getAtlasVoxels('Corticospinal tract L','JHU-tracts.xml')
-#print voxels
-#for i in range(len(voxels[0])):
- #   if voxels[0][i] == 120 and voxels[1][i] == 54 and voxels[2][i] == 33:
-  #      print "yay!"
+voxels = getAtlasVoxels('Corticospinal tract L','JHU-tracts.xml')
+print voxels
+for i in range(len(voxels[0])):
+    if voxels[0][i] == 120 and voxels[1][i] == 54 and voxels[2][i] == 33:
+        print "yay!"
