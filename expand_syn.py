@@ -26,6 +26,8 @@ def getSynonyms(keyword):
 	syn_list = []
 	for syn in syn_list_loc:
 		syn_list.append(syn.text)
+	syn_list.append(keyword)
 	return syn_list
 	
-print getSynonyms('cerebral cortex')
+# print getSynonyms('cerebral cortex')
+

@@ -11,8 +11,9 @@ from __builtin__ import True
 
 
 
-def getAtlasVoxels(region, xmlFile, def_dir = '/Applications/fmri_progs/fsl/data/atlases/'):
-	tree = ET.parse(os.path.join(def_dir, xmlFile))
+
+def getAtlasVoxels(region, atlas_file, dir = '/Applications/fmri_progs/fsl/data/atlases/'):
+	tree = ET.parse(os.path.join(dir, atlas_file))
 	root = tree.getroot()
 	summaryimagelist = []
 	summaryimagefile = ''
@@ -23,22 +24,19 @@ def getAtlasVoxels(region, xmlFile, def_dir = '/Applications/fmri_progs/fsl/data
 			summaryimagefile = images.find('summaryimagefile').text
 			
 	atlas_name = summaryimagefile + '.nii.gz'
-	#print atlas_name
-	atlas=nibabel.load(os.path.join(def_dir, atlas_name[1:]))
+	atlas=nibabel.load(os.path.join(dir, atlas_name[1:]))
 	atlas_data=atlas.get_data()
 	name_value = 0
-	#print "Region: %s"%region
 	data = root.find
 	
 	for i in range(len(root[1])):
 		name = root[1][i].text.split('(')[0].replace("'",'').rstrip(' ').lower()
-		#print "Name: %s"%name
 		if name == region.lower():
 			name_value = i+1
 			voxels = numpy.where(atlas_data==name_value)
 			return voxels
-			
-	return 'not in atlas'
+	raise ValueError('"{region}" not in "{atlas_file}"'.format(region=region, atlas_name=atlas_file))
+       
         
 voxels = getAtlasVoxels('Corticospinal tract L','JHU-tracts.xml')
 print voxels
