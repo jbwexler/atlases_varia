@@ -84,4 +84,4 @@ def toAtlas(region, atlas_file, ontology_file, atlas_dir = '/Applications/fmri_p
    
     
 
-print toAtlas('gyrus rectus', 'HarvardOxford-Cortical.xml', 'allen_brain_atlas_human_ontology_fixed.txt')
+print toAtlas('frontal lobe', 'HarvardOxford-Cortical.xml', 'allen_brain_atlas_human_ontology_fixed.txt')
