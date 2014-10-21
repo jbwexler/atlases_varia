@@ -64,12 +64,14 @@ def NIFfindNodes(graph, startNode, targets, direction = 'children'):
         matchingRelatives = []
         if direction == 'parents':
             for child in NIFparents(graph, startNode):
+                print child, NIFfindNodes(graph, child.lower(), targets, direction)
                 matchingRelatives += NIFfindNodes(graph, child.lower(), targets, direction)
         else:
             for child in NIFchildren(graph, startNode):
+                print child, NIFfindNodes(graph, child.lower(), targets, direction)
                 matchingRelatives += NIFfindNodes(graph, child.lower(), targets, direction)
         return matchingRelatives
     
 # print NIFchildren(g,"frontal lobe")
 # print NIFparents(g, "frontal lobe")
-print NIFfindNodes(g, "neocortex", targets)
+print NIFfindNodes(g, "basal ganglia", targets)
