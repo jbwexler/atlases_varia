@@ -9,11 +9,12 @@ import os.path
 from __builtin__ import True
 from expand_syn import*
 import networkx as nx
+import cPickle as pickle
 
-def ontToGraph(ontology_file, ont_dir = '/Users/jbwexler/poldrack_lab/cs/other'):
-            
-    ontology_file = os.path.join(ont_dir, ontology_file)
-    f=open(ontology_file)
+def ontToGraph(ont_file, ont_dir = '/Users/jbwexler/poldrack_lab/cs/other'):
+    
+    ont_file = os.path.join(ont_dir, ont_file)
+    f=open(ont_file)
     f.readline().strip().split('\t')
     lines=[i.strip().split('\t') for i in f.readlines()]
     f.close()
@@ -48,10 +49,8 @@ def findNodes(graph, startNode, targets, direction = 'children'):
         return matchingRelatives
 
 
-def toAtlas(region, atlas_file, ontology_file, atlas_dir = '/Applications/fmri_progs/fsl/data/atlases/', ont_dir = '/Users/jbwexler/poldrack_lab/cs/other'):
+def toAtlas(region, graph, atlas_file, atlas_dir = '/Applications/fmri_progs/fsl/data/atlases/'):
     
-            
-            
     tree = ET.parse(os.path.join(atlas_dir, atlas_file))
     root = tree.getroot()
     targets = [x.text.lower() for x in root[1]]
@@ -66,7 +65,7 @@ def toAtlas(region, atlas_file, ontology_file, atlas_dir = '/Applications/fmri_p
             return final_list
         
     
-    graph = ontToGraph(ontology_file, ont_dir)
+    
     
     region_id = [n for n,d in graph.nodes_iter(data=True) if d['name'] == region][0]
     
@@ -82,6 +81,10 @@ def toAtlas(region, atlas_file, ontology_file, atlas_dir = '/Applications/fmri_p
    
  
    
-    
+# with open('networkxGraph1.pkl','rb') as input:
+#     graph = pickle.load(input)
+ont_file = 'allen_brain_atlas_human_ontology_fixed.txt'
+graph = ontToGraph(ont_file)
 
-print toAtlas('frontal lobe', 'HarvardOxford-Cortical.xml', 'allen_brain_atlas_human_ontology_fixed.txt')
+
+print toAtlas('frontal lobe', graph, 'HarvardOxford-Cortical.xml')

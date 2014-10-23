@@ -5,8 +5,8 @@ for our purposes than using rdflib to do a SPARQL query on the .owl.
 
 import rdflib
 import nibabel
-import cPickle as pickle
 import networkx as nx
+import cPickle as pickle
 
 
 owl_file = '/Users/jbwexler/poldrack_lab/cs/other/NIF-GrossAnatomy_reasoner.owl'
@@ -15,8 +15,9 @@ g.load(owl_file)
 netx = nx.DiGraph()
 
 nodesAndParents = {}
+parentNames = {}
 
-query = g.query(
+proper_part_ofQuery = g.query(
            """
             PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -24,7 +25,7 @@ query = g.query(
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             PREFIX ro: <http://www.obofoundry.org/ro/ro.owl#>
             PREFIX ont: <http://ontology.neuinfo.org/NIF/BiomaterialEntities/NIF-GrossAnatomy.owl#>
-            SELECT (str(?label) as ?stringlabel) (str(?parlabel) as ?stringparlabel) (str(?chilabel) as ?stringchilabel)
+            SELECT (str(?label) as ?stringlabel) (str(?parlabel) as ?stringparlabel) (str(?region) as ?stringregion) (str(?parent) as ?stringparent) 
             WHERE { 
             ?region rdfs:subClassOf+ ont:birnlex_1167.
             ?region rdfs:label ?label.
@@ -33,30 +34,39 @@ query = g.query(
             ?restrictionPar owl:onProperty ro:proper_part_of.
             ?restrictionPar owl:someValuesFrom ?parent.
             ?parent rdfs:label ?parlabel.}
-            OPTIONAL {?region rdfs:subClassOf ?restrictionChi.
-            ?restrictionChi owl:onProperty ro:has_proper_part.
-            ?restrictionChi owl:someValuesFrom ?child.
-            ?child rdfs:label ?chilabel.
-            }} """)
+             }
+            """)
 
-for x in query:
-    
-    node = str(x.stringlabel).lower()
-    parent = str(x.stringparlabel).lower()
+
+for x in proper_part_ofQuery:
+    node = str(x.stringregion).lower()
+    node_name = str(x.stringlabel).lower()
+    parent = str(x.stringparent).lower()
+    parentName = str(x.stringparlabel).lower()
     if not node in nodesAndParents.keys():
-        nodesAndParents[node] = set([parent])
+        nodesAndParents[node] = [node_name, set([parent])]
     else:
-        nodesAndParents[node].add(parent)
+        nodesAndParents[node][1].add(parent)
+    if parent != 'none':
+        parentNames[parent] = parentName
 
-for nodes in nodesAndParents.keys():
-    netx.add_node(nodes)
-
-for child, parents in nodesAndParents.items():
+for parent, name in parentNames.items():
+    if parent not in nodesAndParents.keys():
+        nodesAndParents[parent] = [name, set(['none'])]
+        print nodesAndParents[parent]
+     
+for node in nodesAndParents.keys():
+    node_name = nodesAndParents[node][0]
+    netx.add_node(node, {'name':node_name})
+ 
+for child, values in nodesAndParents.items():
+    parents = values[1]
     for parent in parents:
         if parent != 'none':
             netx.add_edge(parent, child)
-
-with open('networkxGraph.pkl','wb') as output:
+             
+        
+pkl_file = 'networkxGraph1.pkl'
+ 
+with open(pkl_file,'wb') as output:
     pickle.dump(netx, output, -1)
-
-
