@@ -61,7 +61,6 @@ def toAtlas(region, graph, atlas_file, atlas_dir = '/Applications/fmri_progs/fsl
     for name in targets:
         if name in synonyms:
             final_list.append(name)
-            print 'in atlas'
             return final_list
         
     
@@ -80,11 +79,12 @@ def toAtlas(region, graph, atlas_file, atlas_dir = '/Applications/fmri_progs/fsl
     return 'none'
    
  
-   
+
+
 # with open('networkxGraph1.pkl','rb') as input:
 #     graph = pickle.load(input)
-ont_file = 'allen_brain_atlas_human_ontology_fixed.txt'
-graph = ontToGraph(ont_file)
-
-
-print toAtlas('frontal lobe', graph, 'HarvardOxford-Cortical.xml')
+# ont_file = 'allen_brain_atlas_human_ontology_fixed.txt'
+# graph = ontToGraph(ont_file)
+# 
+# 
+# print toAtlas('frontal lobe', graph, 'HarvardOxford-Cortical.xml')
