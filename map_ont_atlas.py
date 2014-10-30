@@ -1,8 +1,8 @@
 """
-calls toAtlas of every region in ontology and returns a dictionary...............
+maps each region in an ontology graph to its best matching region in the atlas (using toAtlas).
+output is a dictionary with atlas regions as keys and list of corresponding ontology regions as values.
 """
 
-import nibabel
 import xml.etree.ElementTree as ET
 import numpy
 import os.path
