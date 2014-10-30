@@ -34,57 +34,60 @@ def ontToGraph(ont_file, ont_dir = '/Users/jbwexler/poldrack_lab/cs/other'):
                 g.add_edge(parent_id, cur_id)
     return g
 
-def findNodes(graph, startNode, targets, direction = 'children'):
-    synAndTargets = [e for e in getSynonyms(graph.node[startNode]['name']) if e in targets]
-    if len(synAndTargets) > 0:
-        return synAndTargets
+def findNodes(graph, startNode, atlasRegions, synonymsDict, direction = 'children'):
+    matches = [key for key in synonymsDict.keys() if graph.node[startNode]['name'] in synonymsDict[key]]
+    if matches != []:
+        return matches
     else:
         matchingRelatives = []
         if direction == 'parents':
             for child in graph.predecessors_iter(startNode):
-                matchingRelatives += findNodes(graph, child, targets, direction)
+                matchingRelatives += findNodes(graph, child, atlasRegions, synonymsDict, direction)
         else:
             for child in graph.successors_iter(startNode):
-                matchingRelatives += findNodes(graph, child, targets, direction)
+                matchingRelatives += findNodes(graph, child, atlasRegions, synonymsDict, direction)
         return matchingRelatives
 
 
-def toAtlas(region, graph, atlas_file, atlas_dir = '/Applications/fmri_progs/fsl/data/atlases/'):
-    
-    tree = ET.parse(os.path.join(atlas_dir, atlas_file))
-    root = tree.getroot()
-    targets = [x.text.lower() for x in root[1]]
+def toAtlas(region, graph, atlasRegions, synonymsDict):
     final_list = []
-    
 #checking if region or synonyms exist in atlas. if so, simply return region
-    synonyms = getSynonyms(region)
-    for name in targets:
-        if name in synonyms:
-            final_list.append(name)
-            return final_list
+    for atlasRegion in atlasRegions:
+        if region in synonymsDict[atlasRegion]:
+            final_list.append(atlasRegion)
+    if final_list != []: 
+        return final_list
         
     
     
     
     region_id = [n for n,d in graph.nodes_iter(data=True) if d['name'] == region][0]
     
-    matchingChildren = findNodes(graph, region_id, targets)
+    matchingChildren = findNodes(graph, region_id, atlasRegions, synonymsDict, 'children')
 
     if len(matchingChildren) > 0:
         return matchingChildren
     else:
-        matchingParents = findNodes(graph, region_id, targets, 'parents')
+        matchingParents = findNodes(graph, region_id, atlasRegions, synonymsDict, 'parents')
         if len(matchingParents) > 0:
             return matchingParents
     return 'none'
    
- 
+atlas_file = 'HarvardOxford-Cortical.xml'
+atlas_dir = '/Applications/fmri_progs/fsl/data/atlases/'
+tree = ET.parse(os.path.join(atlas_dir, atlas_file))
+root = tree.getroot()
+atlasRegions = [x.text.lower() for x in root[1]]
 
+synonymsDict = {}
+for region in atlasRegions:
+    synonymsDict[region] = getSynonyms(region)
 
-# with open('networkxGraph1.pkl','rb') as input:
-#     graph = pickle.load(input)
+with open('networkxGraph2.pkl','rb') as input:
+    graph = pickle.load(input)
 # ont_file = 'allen_brain_atlas_human_ontology_fixed.txt'
 # graph = ontToGraph(ont_file)
-# 
-# 
-# print toAtlas('frontal lobe', graph, 'HarvardOxford-Cortical.xml')
+
+ 
+ 
+# print toAtlas('temporal lobe', graph, atlasRegions, synonymsDict)
