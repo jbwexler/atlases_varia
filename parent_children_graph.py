@@ -2,7 +2,6 @@
 takes string of brain region from data and returns list of relevant brain region(s) that are in atlas
 """
 
-import nibabel
 import xml.etree.ElementTree as ET
 import numpy
 import os.path
@@ -51,43 +50,43 @@ def findNodes(graph, startNode, atlasRegions, synonymsDict, direction = 'childre
 
 def toAtlas(region, graph, atlasRegions, synonymsDict):
     final_list = []
-#checking if region or synonyms exist in atlas. if so, simply return region
+    # checking if region or synonyms exist in atlas. if so, simply return region
     for atlasRegion in atlasRegions:
         if region in synonymsDict[atlasRegion]:
             final_list.append(atlasRegion)
     if final_list != []: 
         return final_list
-        
     
-    
-    
-    region_id = [n for n,d in graph.nodes_iter(data=True) if d['name'] == region][0]
-    
+    # checking recursively for child matches. if it finds any, return them    
+    region_id = [n for n,d in graph.nodes_iter(data=True) if d['name'] == region][0]   
     matchingChildren = findNodes(graph, region_id, atlasRegions, synonymsDict, 'children')
-
     if len(matchingChildren) > 0:
         return matchingChildren
+    
+    # checking recursively for parent matches. if it finds any, return them
     else:
         matchingParents = findNodes(graph, region_id, atlasRegions, synonymsDict, 'parents')
         if len(matchingParents) > 0:
             return matchingParents
+    
+    # otherwise, return 'none'
     return 'none'
    
-atlas_file = 'HarvardOxford-Cortical.xml'
-atlas_dir = '/Applications/fmri_progs/fsl/data/atlases/'
-tree = ET.parse(os.path.join(atlas_dir, atlas_file))
-root = tree.getroot()
-atlasRegions = [x.text.lower() for x in root[1]]
-
-synonymsDict = {}
-for region in atlasRegions:
-    synonymsDict[region] = getSynonyms(region)
-
-with open('networkxGraph2.pkl','rb') as input:
-    graph = pickle.load(input)
-# ont_file = 'allen_brain_atlas_human_ontology_fixed.txt'
-# graph = ontToGraph(ont_file)
-
- 
- 
-# print toAtlas('temporal lobe', graph, atlasRegions, synonymsDict)
+# atlas_file = 'HarvardOxford-Cortical.xml'
+# atlas_dir = '/Applications/fmri_progs/fsl/data/atlases/'
+# tree = ET.parse(os.path.join(atlas_dir, atlas_file))
+# root = tree.getroot()
+# atlasRegions = [x.text.lower() for x in root[1]]
+# 
+# synonymsDict = {}
+# for region in atlasRegions:
+#     synonymsDict[region] = getSynonyms(region)
+# 
+# with open('networkxGraph2.pkl','rb') as input:
+#     graph = pickle.load(input)
+# # ont_file = 'allen_brain_atlas_human_ontology_fixed.txt'
+# # graph = ontToGraph(ont_file)
+# 
+#  
+#  
+# print toAtlas('lobe of cerebral cortex', graph, atlasRegions, synonymsDict)

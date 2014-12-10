@@ -10,11 +10,16 @@ from __builtin__ import True
 import networkx as nx
 import cPickle as pickle
 from networkx import NetworkXError
-from parent_children_graph import toAtlas
+from parent_children_graph import * 
 from expand_syn import getSynonyms
+from boto.s3.multipart import Part
 
 with open('networkxGraph2.pkl','rb') as input:
-    graph = pickle.load(input)
+    nif = pickle.load(input)
+
+ont_file = 'allen_brain_atlas_human_ontology_fixed.txt'
+allen = ontToGraph(ont_file)
+
 
 def mapOntAtlas(graph, atlas_file, atlas_dir = '/Applications/fmri_progs/fsl/data/atlases/'):
     tree = ET.parse(os.path.join(atlas_dir, atlas_file))
@@ -39,7 +44,32 @@ def mapOntAtlas(graph, atlas_file, atlas_dir = '/Applications/fmri_progs/fsl/dat
     return mapDict
         
 
-final = mapOntAtlas(graph, 'HarvardOxford-Cortical.xml')
 
-for key, value in final.items():
-    print key, value
+def dontMap(graph, atlas_file, atlas_dir = '/Applications/fmri_progs/fsl/data/atlases/'):
+    map = mapOntAtlas(graph, atlas_file, atlas_dir)
+    dontMapList = [key for key, value in map.items() if value == []]
+    return dontMapList
+
+# atlas = 'Juelich.xml'
+# nifDont = dontMap(nif, atlas)
+# allenDont = dontMap(allen, atlas)
+# allenMap = mapOntAtlas(allen, atlas)
+# 
+# print 'NIF \n'
+# 
+# for region in nifDont:
+#     print region
+# 
+# print
+# print 'Allen \n'
+# for region in allenDont:
+#     print region
+# print
+# 
+# print 'dif \n'
+# for region in nifDont:
+#     if region not in allenDont:
+#         print '----%s----' % region
+#         for part in allenMap[region]:
+#             print part
+#         print

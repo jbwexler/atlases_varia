@@ -10,17 +10,15 @@ import urllib2
 from __builtin__ import True
 
 def getSynonyms(keyword):
-	keyword_no_white = ''
-	for c in keyword:
-		if c == ' ':
-			keyword_no_white += '%20'
-		else:
-			keyword_no_white += c
+	keywordQuery = keyword
+	keywordQuery = keywordQuery.replace(' ', '%20')
+	keywordQuery = keywordQuery.replace('/', '')
+	keywordQuery = keywordQuery.replace('\\', '')
 	hdr = {'Accept': 'ext/html,application/xhtml+xml,application/xml,*/*'}
-	target_url = 'http://nif-services.neuinfo.org/servicesv1/v1/literature/search?q=' + keyword_no_white
-	req = urllib2.Request(target_url,headers=hdr)
-	file = urllib2.urlopen(req)
-	tree = ET.parse(file)
+	target_url = 'http://nif-services.neuinfo.org/servicesv1/v1/literature/search?q=' + keywordQuery
+	request = urllib2.Request(target_url,headers=hdr)
+	synFile = urllib2.urlopen(request)
+	tree = ET.parse(synFile)
 	root = tree.getroot()
 	syn_list_loc = root.findall('query/clauses/clauses/expansion/expansion')
 	syn_list = []
@@ -29,5 +27,5 @@ def getSynonyms(keyword):
 	syn_list.append(keyword)
 	return syn_list
 	
-# print getSynonyms('cerebral cortex')
+# print getSynonyms('Fornix (cres)  Stria terminalis / sdfggggggggggggggggggggggg/ ')
 

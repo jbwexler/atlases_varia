@@ -63,6 +63,6 @@ def voxelToRegion(X,Y,Z,atlas_file, dir = '/Applications/fmri_progs/fsl/data/atl
 		return atlasRegions[index]
 
 	
-print voxelToRegion(45, 16, 36,'HarvardOxford-Cortical.xml')
+# print voxelToRegion(45, 16, 36,'HarvardOxford-Cortical.xml')
 	
 	
