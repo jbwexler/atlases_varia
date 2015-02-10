@@ -89,7 +89,7 @@ else:
 
 # for node, d in netx.nodes_iter(data=True):
 #     try:
-#         john = d['name']
+#         josé = d['name'] #josé-julio-hernandez
 #     except KeyError:
 #         print node, d
 #         print "AHHHHHHH!HHH!H!H!"
