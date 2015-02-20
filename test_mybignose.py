@@ -1,7 +1,7 @@
 from nose.tools import eq_, ok_, istest
 import nose
 from parent_children_graph import ontToGraph, toAtlas
-# from store_networkx_graph import *
+# from store_nif_graph import *
 
 
 

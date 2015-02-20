@@ -13,15 +13,10 @@ from networkx import NetworkXError
 from parent_children_graph import * 
 from expand_syn import getSynonyms
 from boto.s3.multipart import Part
+import xlwt
+from itertools import izip_longest
 
-with open('networkxGraph2.pkl','rb') as input:
-    nif = pickle.load(input)
-
-ont_file = 'allen_brain_atlas_human_ontology_fixed.txt'
-allen = ontToGraph(ont_file)
-
-
-def mapOntAtlas(graph, atlas_file, atlas_dir = '/Applications/fmri_progs/fsl/data/atlases/'):
+def mapOntAtlas(graph, atlas_file, parentChildren, atlas_dir = '/Applications/fmri_progs/fsl/data/atlases/'):
     tree = ET.parse(os.path.join(atlas_dir, atlas_file))
     root = tree.getroot()
     atlasRegions = [x.text.lower() for x in root[1]]
@@ -37,7 +32,7 @@ def mapOntAtlas(graph, atlas_file, atlas_dir = '/Applications/fmri_progs/fsl/dat
     
     for node in graph:
         nodeName = graph.node[node]['name']
-        matches = toAtlas(nodeName, graph, atlasRegions, synonymsDict)
+        matches = toAtlas(nodeName, graph, atlasRegions, synonymsDict, parentChildren)
         if matches != 'none':
             for region in matches:
                 mapDict[region].append(nodeName)
@@ -50,26 +45,68 @@ def dontMap(graph, atlas_file, atlas_dir = '/Applications/fmri_progs/fsl/data/at
     dontMapList = [key for key, value in map.items() if value == []]
     return dontMapList
 
-# atlas = 'Juelich.xml'
-# nifDont = dontMap(nif, atlas)
-# allenDont = dontMap(allen, atlas)
-# allenMap = mapOntAtlas(allen, atlas)
-# 
-# print 'NIF \n'
-# 
-# for region in nifDont:
-#     print region
-# 
-# print
-# print 'Allen \n'
-# for region in allenDont:
-#     print region
-# print
-# 
-# print 'dif \n'
-# for region in nifDont:
-#     if region not in allenDont:
-#         print '----%s----' % region
-#         for part in allenMap[region]:
-#             print part
-#         print
+def createMap(graph, atlas_dir = '/Applications/fmri_progs/fsl/data/atlases/', parentChildren = True):
+    fullMap = {}
+    for file in os.listdir(atlas_dir):
+        if '.xml' in file and file != 'Talairach.xml': 
+            map = mapOntAtlas(graph, file, parentChildren, atlas_dir)
+            for key, value in map.items():
+                fullMap[key] = value
+    return fullMap
+
+
+with open('NIFgraph.pkl','rb') as input:
+    nif = pickle.load(input)
+    
+excel = xlwt.Workbook()
+sheet1 = excel.add_sheet('sheet1')
+justSyn = createMap(nif, parentChildren=False)
+parChi = createMap(nif)
+excelList = [[],[],[]]
+
+# for atlasRegion in justSyn.keys():
+#     sortedZip = izip_longest(justSyn[atlasRegion].sort(), parChi[atlasRegion].sort())
+#     for (justRegion, parRegion) in sortedZip:
+#         excelList[0].append(atlasRegion)
+#         excelList[1].append(justRegion)
+#         excelList[2].append(parRegion)
+# for node in nif:
+#     nodeName = nif.node[node]['name']
+#     if nodeName .
+
+totalDict = {}
+mappedOntRegions = set()
+for node in nif:
+    nodeName = nif.node[node]['name']
+    totalDict[nodeName] = {}
+    totalDict[nodeName]['parChi'] = []
+    totalDict[nodeName]['justSyn'] = []
+for atlasRegion in parChi.keys():
+    for ontRegion in parChi[atlasRegion]:
+        totalDict[ontRegion]['parChi'].append(atlasRegion)
+        mappedOntRegions.add(ontRegion)
+for atlasRegion in justSyn.keys():
+    for ontRegion in justSyn[atlasRegion]:
+        totalDict[ontRegion]['justSyn'].append(atlasRegion)
+        
+count = 1
+for ontRegion, dict in totalDict.items():
+    sortedZip = izip_longest(sorted(dict['parChi']), sorted(dict['justSyn']))
+    print sortedZip
+    for (parChiRegion, justSynRegion) in sortedZip:
+        sheet1.write(count,1, ontRegion)
+        sheet1.write(count,2, justSynRegion)
+        sheet1.write(count,3, parChiRegion)
+        count += 1
+
+for node in nif:
+    nodeName = nif.node[node]['name']
+    if nodeName not in mappedOntRegions:
+        sheet1.write(count,1, nodeName)
+        count +=1
+
+excel.save('/Users/jbwexler/poldrack_lab/cs/other/ontmap.xls')  
+    
+        
+    
+

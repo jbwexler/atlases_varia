@@ -15,17 +15,20 @@ def getSynonyms(keyword):
 	keywordQuery = keywordQuery.replace('/', '')
 	keywordQuery = keywordQuery.replace('\\', '')
 	hdr = {'Accept': 'ext/html,application/xhtml+xml,application/xml,*/*'}
-	target_url = 'http://nif-services.neuinfo.org/servicesv1/v1/literature/search?q=' + keywordQuery
+	target_url = 'http://nif-services.neuinfo.org/ontoquest/getprop/term/' + keywordQuery
 	request = urllib2.Request(target_url,headers=hdr)
-	synFile = urllib2.urlopen(request)
+	synFile = urllib2.urlopen(request)		
 	tree = ET.parse(synFile)
 	root = tree.getroot()
-	syn_list_loc = root.findall('query/clauses/clauses/expansion/expansion')
+
+	classes = root.findall('data/classes/class')
 	syn_list = []
-	for syn in syn_list_loc:
-		syn_list.append(syn.text)
+	for element in classes:
+		synonyms = element.findall("properties/property[@name='has_exact_synonym']")
+		for syn in synonyms:
+			syn_list.append(syn.text)
 	syn_list.append(keyword)
 	return syn_list
-	
+
 # print getSynonyms('Fornix (cres)  Stria terminalis / sdfggggggggggggggggggggggg/ ')
 

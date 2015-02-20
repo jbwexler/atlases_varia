@@ -40,21 +40,22 @@ def findNodes(graph, startNode, atlasRegions, synonymsDict, direction = 'childre
     else:
         matchingRelatives = []
         if direction == 'parents':
-            for child in graph.predecessors_iter(startNode):
-                matchingRelatives += findNodes(graph, child, atlasRegions, synonymsDict, direction)
+            for parent in graph.predecessors_iter(startNode):
+                matchingRelatives += findNodes(graph, parent, atlasRegions, synonymsDict, direction)
         else:
             for child in graph.successors_iter(startNode):
                 matchingRelatives += findNodes(graph, child, atlasRegions, synonymsDict, direction)
         return matchingRelatives
 
 
-def toAtlas(region, graph, atlasRegions, synonymsDict):
+def toAtlas(region, graph, atlasRegions, synonymsDict, parentChildren):
     final_list = []
     # checking if region or synonyms exist in atlas. if so, simply return region
     for atlasRegion in atlasRegions:
         if region in synonymsDict[atlasRegion]:
             final_list.append(atlasRegion)
-    if final_list != []: 
+    print parentChildren
+    if final_list != [] or parentChildren == False: 
         return final_list
     
     # checking recursively for child matches. if it finds any, return them    
@@ -66,11 +67,7 @@ def toAtlas(region, graph, atlasRegions, synonymsDict):
     # checking recursively for parent matches. if it finds any, return them
     else:
         matchingParents = findNodes(graph, region_id, atlasRegions, synonymsDict, 'parents')
-        if len(matchingParents) > 0:
-            return matchingParents
-    
-    # otherwise, return 'none'
-    return 'none'
+        return matchingParents
    
 # atlas_file = 'HarvardOxford-Cortical.xml'
 # atlas_dir = '/Applications/fmri_progs/fsl/data/atlases/'
